@@ -10,17 +10,18 @@
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <link rel="stylesheet" href="css/main.css">
   <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@76a666e65127337159d7447b304bf114acc35f25/dist/aframe-master.min.js"></script>
-  <script src="./js/aframe-ar.min.js"></script>
+  <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.5.0/aframe/examples/vendor/aframe/build/aframe.min.js"></script>
+  <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.5.0/aframe/build/aframe-ar.js"></script>
+
 </head>
 <body>
 <a-scene embedded arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false;'>
     <a-assets>
         <a-asset-item id="mikolaj" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/1.0/CesiumMan/glTF/CesiumMan.gltf"></a-asset-item>
     </a-assets>
-    <a-marker-camera preset=’hiro’>
-      <a-gltf-model src="#mikolaj"></a-gltf-model>
-    </a-marker-camera>
-    <a-entity camera></a-entity>
+    <a-gltf-model src="#mikolaj"></a-gltf-model>
+    <a-marker-camera preset=’hiro’></a-marker-camera>
+    <a-camera-static/>
   </a-scene>
 </body>
 
@@ -30,6 +31,7 @@
     width: 100vh;
     height: 100vh;
     overflow: hidden;
+    margin: 0;
   }
 </style>
 </html>
