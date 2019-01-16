@@ -15,33 +15,36 @@
     <script src="./js/aframe-extras.min.js"></script>
     <!-- include ar.js for A-Frame -->
     <script src="./js/aframe-ar.min.js"></script>
+    <script src='./js/aframe-shadow-plane.js'></script>
     <!-- Include text geometry -->
     <script src="https://unpkg.com/aframe-text-geometry-component@^0.5.0/dist/aframe-text-geometry-component.min.js"></script>
 </head>
 
 <body style='margin : 0px; overflow: hidden;'>
-<a-scene embedded arjs="sourceType: webcam;" inspector>
+<a-scene embedded arjs="sourceType: webcam; trackingMethod:best" inspector>
 
     <!-- Loading assets -->
     <a-assets>
         <a-asset-item id="robot" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/1.0/BrainStem/glTF/BrainStem.gltf"></a-asset-item>
-        <a-asset-item id="mikolaj" src="./img/nowygit.obj"></a-asset-item>
+        <a-asset-item id="helmet" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"></a-asset-item>
+        <a-asset-item id="mikolaj" src="./img/nowygit.gltf"></a-asset-item>
         <a-asset-item id="openSans" src="./img/open-sans.json"></a-asset-item>
         <img id="gold" src="./img/gold.png">
     </a-assets>
 
     <!-- Custom marker example -->
-    <a-marker type="pattern" url="./img/pattern-marker.patt">
-        <a-entity gltf-model-legacy="#robot" animation-mixer></a-entity>
-    </a-marker>
+    <!--<a-marker type="pattern" url="./img/pattern-marker.patt">-->
+        <!--<a-entity gltf-model="#mikolaj" animation-mixer scale="0.5 0.5 0.5"></a-entity>-->
+    <!--</a-marker>-->
 
     <!-- Mikolaj model -->
     <a-marker preset="hiro">
-            <a-entity obj-model="obj: #mikolaj"
-                      shadow="cast:true"
-                      material="src: #gold; emissive: #000; metalness: 0.8;">
-            </a-entity>
+        <a-entity position="0 0 0">
+            <a-entity light="type:point;" gltf-model="#mikolaj" scale="0.5 0.5 0.5" shadow="cast: true"></a-entity>
+            <a-circle radius="1.5" rotation="-90 0 0" position="0 -0.8 0" shadow="receive: true" material="color: #ad7628; metalness: 0.8"></a-circle>
+        </a-entity>
     </a-marker>
+    <a-entity light="color: #fff; intensity: 0.4; castShadow: true" position="0.75 5 6"></a-entity>
 
     <!-- Intro text -->
     <a-entity text="value: Hi; align: center; opacity: 1;" position="0 0 -1" scale="2 2 2" id="welcome">
