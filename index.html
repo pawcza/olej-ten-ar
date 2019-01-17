@@ -13,18 +13,76 @@
     <script src="./js/aframe-v0.8.2.min.js"></script>
     <!-- include ar.js for A-Frame -->
     <script src="./js/aframe-ar.min.js"></script>
+
 </head>
+
+<script>
+    AFRAME.registerComponent('registerevents', {
+        init: function() {
+            var marker = this.el;
+            marker.setAttribute('emitevents', 'true');
+            marker.addEventListener('markerFound', function(){
+                var markerId = marker.id;
+                console.log('marker found', markerId);
+            })
+            marker.addEventListener('markerLost',function(){
+               console.log('markerlost');
+            });
+        }
+    })
+</script>
+
+<script>
+    // register our component
+    AFRAME.registerComponent('markerhandler', {
+
+        init: function() {
+            const animatedMarker = document.querySelector("#animated-marker");
+
+            animatedMarker.addEventListener('click', function(ev){
+                console.log(ev);
+                if (animatedMarker.object3D.visible == true && ev.detail.cursorEl) {
+                    const ui_container = document.querySelector('#ui-container');
+                    if(ev.target.id === 'animated-model'){
+                        if (ui_container.getAttribute('visible') === false){
+                            ui_container.setAttribute('visible', 'true');
+                        } else {
+                            ui_container.setAttribute('visible', 'false');
+                        }
+                    }
+                    // const scale = entity.getAttribute('scale');
+                    // Object.keys(scale).forEach((key) => scale[key] = scale[key] + 1);
+
+                    // every click, we make our model grow in size
+                    // entity.setAttribute('scale', scale);
+                }
+            });
+        }});
+</script>
+
+<script type="text/javascript">
+    AFRAME.registerComponent('shadow-material', {
+        init() {
+            this.material = new THREE.ShadowMaterial();
+            this.el.getOrCreateObject3D('mesh').material = this.material;
+            this.material.opacity = 0.3;
+        }
+    });
+</script>
 
 <body style='margin : 0px; overflow: hidden;'>
 <a-scene embedded arjs="sourceType: webcam; trackingMethod:best;debugUIEnabled: true" inspector>
 
     <!-- Loading assets -->
     <a-assets>
-        <a-asset-item id="robot" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/1.0/BrainStem/glTF/BrainStem.gltf"></a-asset-item>
-        <a-asset-item id="helmet" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"></a-asset-item>
-        <a-asset-item id="mikolaj" src="./img/nowygit.gltf"></a-asset-item>
+        <a-asset-item id="mikolajGold" src="./img/mikolajGold.gltf"></a-asset-item>
+        <a-asset-item id="mikolaj" src="./img/mikolaj.obj"></a-asset-item>
         <a-asset-item id="openSans" src="./img/open-sans.json"></a-asset-item>
-        <img id="gold" src="./img/gold.png">
+        <img src="./img/gold_material.png" id="gold_icon">
+        <img src="./img/lava_material.png" id="lava_icon">
+        <img src="./img/wood_material.png" id="wood_icon">
+        <img src="./img/chrome_material.png" id="chrome_icon">
+        <a-mixin id="slowRotate" attribute="rotation" dur="10000" fill="forwards" to="0 360 0" repeat="indefinite" easing="linear"></a-mixin>
     </a-assets>
 
     <!-- Custom marker example -->
@@ -33,11 +91,34 @@
     <!--</a-marker>-->
 
     <!-- Mikolaj model -->
-    <a-marker-camera preset="hiro">
-        <a-plane rotation="-90 0 0" shadow="receive: true" material="color: #ad7628; metalness: 0.8"></a-plane>
-        <a-entity position="0 0.75 0" light="type:point;" gltf-model="#mikolaj" scale="0.3 0.3 0.3" shadow="cast: true"></a-entity>
+    <a-marker-camera markerhandler emitevents="true" cursor="rayOrigin: mouse" id="animated-marker" preset="hiro">
+        <!--<a-entity id="animated-model" position="0 0 0" light="type:point;" gltf-model="#mikolajGold" scale="0.3 0.3 0.3" shadow="cast: true"></a-entity>-->
+        <a-obj-model id="animated-model" position="0 0 0" light="type:point;" src="#mikolaj" scale="0.3 0.3 0.3" shadow="cast: true"></a-obj-model>
+        <a-entity position="0.8 1.2 0" id="ui-container" visible="false">
+            <!--<a-plane width="1" height="0.5" color="#fff" emissive="#fff" side="double"></a-plane>-->
+            <a-entity text="value: Feel free to try out different materials!; align: left; color:#fff; width: 1.2; side: double;" position="0.15 0.18 0.05"></a-entity>
+            <!--<a-triangle color="#fff" scale="0.1 0.1 0.1" position="-0.5 0 0" emissive="#fff"></a-triangle>-->
+            <a-entity position="-0.3 0 0.03" id="ui-materials">
+                <a-sphere material="metalness: 0.3" src="#gold_icon" radius="0.1" scale="0.5 0.5 0.5">
+                    <a-animation mixin="slowRotate"></a-animation>
+                </a-sphere>
+                <a-sphere material="roughness: 1" src="#lava_icon" position="0.2 -0.1 0" radius="0.1">
+                    <a-animation mixin="slowRotate"></a-animation>
+                </a-sphere>
+                <a-sphere src="#wood_icon" position="0.4 0 0" radius="0.1">
+                    <a-animation mixin="slowRotate"></a-animation>
+                </a-sphere>
+                <a-sphere src="#chrome_icon" position="0.6 -0.1 0" radius="0.1">
+                    <a-animation mixin="slowRotate"></a-animation>
+                </a-sphere>
+            </a-entity>
+        </a-entity>
     </a-marker-camera>
 
+    <!-- Plane shadow material -->
+    <a-plane rotation="-90 0 0" width="4" height="4" shadow="receive: true" shadow-material></a-plane>
+
+    <!-- Light casting shadow -->
     <a-entity light="color: #fff; intensity: 0.4; castShadow: true" position="0.75 5 6"></a-entity>
 
     <!-- Intro text -->
@@ -54,16 +135,22 @@
 
     <!-- Camera -->
     <a-entity camera></a-entity>
+
 </a-scene>
 </body>
 
 
 <style>
-  body{
+    body{
     width: 100vh;
     height: 100vh;
     overflow: hidden;
     margin: 0;
-  }
+    }
+    #ui-container{
+        border-radius: 30px;
+        overflow: hidden;
+    }
+
 </style>
 </html>
