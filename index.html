@@ -9,57 +9,13 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet">
     <!-- include A-Frame obviously -->
     <script src="./js/aframe-v0.8.2.min.js"></script>
     <!-- include ar.js for A-Frame -->
     <script src="./js/aframe-ar.min.js"></script>
 
 </head>
-
-<script>
-    AFRAME.registerComponent('registerevents', {
-        init: function() {
-            var marker = this.el;
-            marker.setAttribute('emitevents', 'true');
-            marker.addEventListener('markerFound', function(){
-                var markerId = marker.id;
-                console.log('marker found', markerId);
-            })
-            marker.addEventListener('markerLost',function(){
-               console.log('markerlost');
-            });
-        }
-    })
-</script>
-
-<script>
-    // register our component
-    AFRAME.registerComponent('markerhandler', {
-
-        init: function() {
-            const animatedMarker = document.querySelector("#animated-marker");
-
-            animatedMarker.addEventListener('click', function(ev){
-                if (animatedMarker.object3D.visible == true && ev.detail.cursorEl) {
-
-                    const ui_container = document.querySelector('#ui-container');
-                    if(ev.target.id === 'animated-model'){
-                        if (ui_container.getAttribute('visible') === false){
-                            ui_container.setAttribute('visible', 'true');
-                        } else {
-                            ui_container.setAttribute('visible', 'false');
-                        }
-                    }
-
-                    // const scale = entity.getAttribute('scale');
-                    // Object.keys(scale).forEach((key) => scale[key] = scale[key] + 1);
-
-                    // every click, we make our model grow in size
-                    // entity.setAttribute('scale', scale);
-                }
-            });
-        }});
-</script>
 
 <script type="text/javascript">
     AFRAME.registerComponent('shadow-material', {
@@ -71,23 +27,36 @@
     });
 </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const btn = document.querySelector('#btn'), ui = document.querySelector('#ui-container');
+        btn.addEventListener('click',function(e){
+            ui.classList.toggle('active');
+            e.target.classList.toggle('active');
+        });
+        ui.addEventListener('click',function(e){
+            if(e.target.classList.contains('material') && !e.target.classList.contains('active')){
+                document.querySelector('.material.active').classList.remove('active');
+                e.target.classList.add('active');
+                let children = document.querySelectorAll('#animated-marker a-obj-model');
+                for (let x = 0; x < children.length; ++x){
+                    console.log(children[x]);
+                    children[x].setAttribute('visible', 'false');
+                }
+                document.querySelector('#' + e.target.id + '-model').setAttribute('visible', 'true');
+            }
+        })
+    });
+</script>
+
 <body style='margin : 0px; overflow: hidden;'>
 <a-scene embedded arjs="sourceType: webcam; trackingMethod:best;debugUIEnabled: true" inspector>
 
     <!-- Loading assets -->
     <a-assets>
-        <a-asset-item id="mikolajGold" src="./img/mikolajGold.gltf"></a-asset-item>
         <a-asset-item id="mikolaj" src="./img/mikolaj.obj"></a-asset-item>
-        <a-asset-item id="openSans" src="./img/open-sans.json"></a-asset-item>
-        <img src="./img/gold_material.png" id="gold_icon">
-        <img src="./img/lava_material.png" id="lava_icon">
-        <img src="./img/wood_material.png" id="wood_icon">
-        <img src="./img/chrome_material.png" id="chrome_icon">
+
         <a-mixin id="slowRotate" attribute="rotation" dur="10000" fill="forwards" to="0 360 0" repeat="indefinite" easing="linear"></a-mixin>
-        <a-mixin id="goldMaterial" material="src: ./img/gold_material.png; metalness: 0.8; roughness: 0.6;"></a-mixin>
-        <a-mixin id="lavaMaterial" material="src: ./img/lava_material.png; metalness: 0.8; roughness: 0.6;"></a-mixin>
-        <a-mixin id="chromeMaterial" material="src: ./img/chrome_material.png; metalness: 0.8; roughness: 0.6;"></a-mixin>
-        <a-mixin id="woodMaterial" material="src: ./img/wood_material.png; metalness: 0.8; roughness: 0.6;"></a-mixin>
     </a-assets>
 
     <!-- Custom marker example -->
@@ -96,28 +65,35 @@
     <!--</a-marker>-->
 
     <!-- Mikolaj model -->
-    <a-marker-camera markerhandler emitevents="true" cursor="rayOrigin: mouse" id="animated-marker" preset="hiro">
-        <!--<a-entity id="animated-model" position="0 0 0" light="type:point;" gltf-model="#mikolajGold" scale="0.3 0.3 0.3" shadow="cast: true"></a-entity>-->
-        <a-obj-model id="animated-model" position="0 0 0" light="type:point;" src="#mikolaj" mixin="goldMaterial" scale="0.3 0.3 0.3" shadow="cast: true"></a-obj-model>
-        <a-entity position="0.8 1.2 0" id="ui-container" visible="true">
-            <!--<a-plane width="1" height="0.5" color="#fff" emissive="#fff" side="double"></a-plane>-->
-            <a-entity text="value: Feel free to try out different materials!; align: left; color:#fff; width: 1.2; side: double;" position="0.15 0.18 0.05"></a-entity>
-            <!--<a-triangle color="#fff" scale="0.1 0.1 0.1" position="-0.5 0 0" emissive="#fff"></a-triangle>-->
-            <a-entity position="-0.3 0 0.03" id="ui-materials">
-                <a-sphere material="metalness: 0.3" src="#gold_icon" radius="0.1" scale="0.5 0.5 0.5" class="material" id="gold">
-                    <a-animation mixin="slowRotate"></a-animation>
-                </a-sphere>
-                <a-sphere material="roughness: 1" src="#lava_icon" position="0.2 -0.1 0" radius="0.1" class="material" id="lava">
-                    <a-animation mixin="slowRotate"></a-animation>
-                </a-sphere>
-                <a-sphere src="#wood_icon" position="0.4 0 0" radius="0.1" class="material" id="wood">
-                    <a-animation mixin="slowRotate"></a-animation>
-                </a-sphere>
-                <a-sphere src="#chrome_icon" position="0.6 -0.1 0" radius="0.1" class="material" id="chrome">
-                    <a-animation mixin="slowRotate"></a-animation>
-                </a-sphere>
-            </a-entity>
-        </a-entity>
+    <a-marker-camera id="animated-marker" preset="hiro">
+        <a-obj-model id="gold-model"
+                     light="type:point;"
+                     src="#mikolaj"
+                     material="src: ./img/gold_material.png; metalness: 0.8; roughness: 0.6;"
+                     scale="0.3 0.3 0.3"
+                     visible="true"
+                     shadow="cast: true"></a-obj-model>
+        <a-obj-model id="lava-model"
+                     light="type:point;"
+                     visible="false"
+                     src="#mikolaj"
+                     material="src: ./img/lava_material_big.png; metalness: 0.3; roughness: 0.6; repeat: 100 20"
+                     scale="0.3 0.3 0.3"
+                     shadow="cast: true"></a-obj-model>
+        <a-obj-model id="chrome-model"
+                     light="type:point;"
+                     visible="false"
+                     src="#mikolaj"
+                     material="src: ./img/chrome_material.png; metalness: 1; roughness: 0.6;"
+                     scale="0.3 0.3 0.3"
+                     shadow="cast: true"></a-obj-model>
+        <a-obj-model id="wood-model"
+                     visible="false"
+                     light="type:point;"
+                     src="#mikolaj"
+                     material="src: ./img/wood_material.png; metalness: 0.1; roughness: 0.6; repeat: 100 20"
+                     scale="0.3 0.3 0.3"
+                     shadow="cast: true"></a-obj-model>
     </a-marker-camera>
 
     <!-- Plane shadow material -->
@@ -142,20 +118,145 @@
     <a-entity camera></a-entity>
 
 </a-scene>
+
+<div id="ui-container">
+    <h3>Try out different materials</h3>
+    <span class="material active" id="gold"></span>
+    <span class="material" id="wood"></span>
+    <span class="material" id="lava"></span>
+    <span class="material" id="chrome"></span>
+</div>
+<div id="btn"></div>
+
+
 </body>
 
-
 <style>
-    body{
-    width: 100vh;
-    height: 100vh;
-    overflow: hidden;
-    margin: 0;
+    #btn{
+        position: fixed;
+        left: 25px;
+        height: 64px;
+        width: 64px;
+        top: 40px;
+        z-index: 1;
+        background: white;
+        cursor: pointer;
+        box-shadow: 0px 5px 30px 0px rgba(0,0,0,.25);
+        border-radius: 50%;
+        transition: .3s ease-out;
+        transform: rotate(-45deg);
+    }
+    #btn.active{
+        transform: rotate(0);
+    }
+    #btn:before, #btn:after{
+        position: absolute;
+        content: '';
+        height: 60%;
+        width: 1px;
+        left: 50%;
+        top: 50%;
+        background: #222222;
+        transform: translate(-50%, -50%) rotate(-45deg);
+    }
+    #btn:after{
+        transform: translate(-50%, -50%) rotate(45deg);
     }
     #ui-container{
-        border-radius: 30px;
-        overflow: hidden;
+        position: fixed;
+        font-family: 'Open Sans', sans-serif;
+        width: 100vw;
+        display: flex;
+        justify-content: space-around;
+        padding: 30px;
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        align-items: center;
+        color: #424242;
+        flex-wrap: wrap;
+        will-change: transform;
+        transform: translateY(-100%);
+        transition: .3s ease-in-out;
+        background: white;
+        box-shadow: 0px 5px 30px 0px rgba(0,0,0,.25);
+    }
+    #ui-container.active{
+        transform: translateY(0);
+    }
+    #ui-container h3{
+        font-size: 2em;
+        text-align: center;
+        font-weight: 300;
+    }
+    #ui-container span{
+        width: 64px;
+        height: 64px;
+        position: relative;
+        margin-bottom: 35px;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0px 5px 30px 0px rgba(0,0,0,.25);
+        transition: .25s ease-out;
+    }
+    #ui-container span:before{
+        content: "\2713";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+        font-size: 2em;
+        transition: .2s ease-out;
+    }
+    #ui-container span:after{
+        position: absolute;
+        bottom: -30px;
+        color: #424242;
+        left: 50%;
+        height: 20px;
+        font-weight: 300;
+        font-family: 'Open Sans';
+        text-align: center;
+        transform: translateX(-50%);
+    }
+    #ui-container span:hover:before{
+        opacity: .5;
+    }
+    #ui-container span:hover{
+        transform: scale(.95);
+    }
+    #ui-container span.active{
+        transform: scale(.8);
+    }
+    #ui-container span.active:before{
+        opacity: 1;
+    }
+    #gold{
+        background-image: url('./img/gold_material.png')
+    }
+    #gold:after{
+        content: 'Gold';
+    }
+    #wood{
+        background-image: url('./img/wood_material.png')
+    }
+    #wood:after{
+        content: 'Wood';
+    }
+    #chrome{
+        background-image: url('./img/chrome_material.png')
+    }
+    #chrome:after{
+        content: 'Chrome';
+    }
+    #lava{
+        background-image: url('./img/lava_material.png')
+    }
+    #lava:after{
+        content: 'Lava';
     }
 
 </style>
+
 </html>
